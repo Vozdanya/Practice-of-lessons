@@ -6,7 +6,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 
 from models.models import Hotel
 
-router = APIRouter(prefix='/hotels')
+router = APIRouter(prefix='/hotels', tags=['Отели'])
 
 hotels = [
     {"id": 1, "title": "Sochi", 'name': 'Sochi'},
@@ -14,13 +14,13 @@ hotels = [
 ]
 
 
-@router.get('/sync/{id}')
+@router.get('/sync/{id}', name = 'Тест синхронности')
 def sync_func(id: int):
     print(f'sync.  Started {id}: {time.time():.2f}')
     time.sleep(3)
     print(f'sync.  ended {id}: {time.time():.2f}')
 
-@router.get('/async/{id}')
+@router.get('/async/{id}', name = 'Тест асинхронности')
 async def async_func(id: int):
     print(f'async.  Started {id}: {time.time():.2f}')
     await asyncio.sleep(3)
@@ -41,7 +41,7 @@ def get_hotels(
     return hotels_
 
 
-@router.post("/")
+@router.post("/", name='Добавление нового отеля')
 def create_hotel(
         title: str = Body(embed=True),
 ):
@@ -51,7 +51,7 @@ def create_hotel(
         "title": title
     })
     return {"status": "OK"}
-@router.delete("/{hotel_id}")
+@router.delete("/{hotel_id}", name='Удаление отеля')
 def delete_hotel(hotel_id: int):
     global hotels
     hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
@@ -66,13 +66,13 @@ def update_hotel(hotel_id: int, new_hotel: Hotel):
             return {"Status": "Ok"}
     return {"error": "all fields are required"}
 
-@router.put('/{hotel_id}')
+@router.put('/{hotel_id}', name='Полная вставка данных отеля')
 def hotels_put(hotel_id: int, new_hotel: Hotel):
     update_hotel(hotel_id, new_hotel)
     return hotels
 
 
-@router.patch('/{hotel_id}')
+@router.patch('/{hotel_id}', name='Частичная вставка данных отеля')
 def hotels_put(hotel_id: int, new_hotel: Hotel):
     update_hotel(hotel_id, new_hotel)
     return hotels
