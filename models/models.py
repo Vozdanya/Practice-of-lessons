@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
 
 class Hotel(BaseModel):
-    title: str = 'str'
-    name: str = 'str'
+    title: str | None = Field(None)
+    name: str | None = Field(None)

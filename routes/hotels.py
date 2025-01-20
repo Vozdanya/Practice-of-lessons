@@ -1,49 +1,37 @@
 import asyncio
 import time
+from typing import Optional
 
 from fastapi import APIRouter, Query, Body
-from fastapi.openapi.docs import get_swagger_ui_html
+from pydantic import Field
 
 from models.models import Hotel
 
 router = APIRouter(prefix='/hotels', tags=['Отели'])
 
 hotels = [
-    {"id": 1, "title": "Sochi", 'name': 'Sochi'},
-    {"id": 2, "title": "Дубай", 'name': 'Дубай'},
+    {"id": 1, "title": "Sochi", "name": "sochi"},
+    {"id": 2, "title": "Дубай", "name": "dubai"},
+    {"id": 3, "title": "Мальдивы", "name": "maldivi"},
+    {"id": 4, "title": "Геленджик", "name": "gelendzhik"},
+    {"id": 5, "title": "Москва", "name": "moscow"},
+    {"id": 6, "title": "Казань", "name": "kazan"},
+    {"id": 7, "title": "Санкт-Петербург", "name": "spb"},
 ]
-
-
-@router.get('/sync/{id}', name = 'Тест синхронности')
-def sync_func(id: int):
-    print(f'sync.  Started {id}: {time.time():.2f}')
-    time.sleep(3)
-    print(f'sync.  ended {id}: {time.time():.2f}')
-
-@router.get('/async/{id}', name = 'Тест асинхронности')
-async def async_func(id: int):
-    print(f'async.  Started {id}: {time.time():.2f}')
-    await asyncio.sleep(3)
-    print(f'async.  ended {id}: {time.time():.2f}')
 
 @router.get("/")
 def get_hotels(
         id: int | None = Query(None, description="Айдишник"),
         title: str | None = Query(None, description="Название отеля"),
+        page: int | None = 1,
+        per_page: int | None = 5
 ):
-    hotels_ = []
-    for hotel in hotels:
-        if id and hotel["id"] != id:
-            continue
-        if title and hotel["title"] != title:
-            continue
-        hotels_.append(hotel)
-    return hotels_
+    return hotels[page-1:per_page+page-1]
 
 
 @router.post("/", name='Добавление нового отеля')
 def create_hotel(
-        title: str = Body(embed=True),
+        title: str = Body(),
 ):
     global hotels
     hotels.append({
@@ -67,7 +55,7 @@ def update_hotel(hotel_id: int, new_hotel: Hotel):
     return {"error": "all fields are required"}
 
 @router.put('/{hotel_id}', name='Полная вставка данных отеля')
-def hotels_put(hotel_id: int, new_hotel: Hotel):
+def hotels_put(hotel_id: int, new_hotel: Hotel = Body(openapi_examples={'1': {'summmary': 'Dubai', 'value': hotels[0]}, '2': {'summmary': 'sex', 'value': hotels[1]}})):
     update_hotel(hotel_id, new_hotel)
     return hotels
 
