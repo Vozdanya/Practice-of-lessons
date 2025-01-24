@@ -1,17 +1,16 @@
 from fastapi import FastAPI
 import uvicorn
 
+#Указываем интерпретатору где находится src/main.py
 import sys
 from pathlib import Path
 
-
 sys.path.append(str(Path(__file__).parent.parent))
 
+#Импорт endpoints
 from src.api.routes.hotels import router as router_hotels
-from src.config import settings
 
-print(settings)
-
+from src.database import *
 
 app = FastAPI()
 
