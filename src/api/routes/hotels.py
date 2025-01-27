@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Body
 
 from src.api.dependencies import PaginationDep
-from src.models.models import Hotel
+from src.schemas.schemas import Hotel
 
 router = APIRouter(prefix='/hotels', tags=['Отели'])
 
