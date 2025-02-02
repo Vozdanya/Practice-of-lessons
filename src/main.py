@@ -15,6 +15,7 @@ from src.database import *
 
 app = FastAPI()
 
+# Присоединение endpoints
 app.include_router(router_hotels)
 
 if __name__ == "__main__":

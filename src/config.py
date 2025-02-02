@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     @property
     def DB_URL(self):
+        # postgresql+asyncpg указывает, что используется PostgreSQL с асинхронным драйвером asyncpg.
+        # Полный путь к базе данных
         return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
 
     model_config = SettingsConfigDict(env_file='.env')
