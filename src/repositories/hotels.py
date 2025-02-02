@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from sqlalchemy import select, insert
 
 from src.models.hotels import HotelsOrm
@@ -32,17 +33,14 @@ class HotelsRepository(RepositoryBase):
         return result.scalars().all()
 
     # post метод
-    async def post_object(
+    async def add(
             self,
-            hotel_data: dict
+            hotel_data: BaseModel
     ):
         # Формирование запроса к базе данных
-        add_hotel_stmt = insert(HotelsOrm).values(**hotel_data)
+        add_data_stmt = insert(HotelsOrm).values(**hotel_data.model_dump()).returning(self.model.id)
 
         # Отправляем готовый запрос к базе данных
-        await self.session.execute(add_hotel_stmt)
+        result = await self.session.execute(add_data_stmt)
 
-        # Обязательно зафиксировать изменения
-        await self.session.commit()
-
-        return {'status': 'OK'}
+        return result.scalars().one()
