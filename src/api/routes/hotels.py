@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Body
 
-from src.api.dependencies import PaginationDep
+from src.api.dependencies import PaginationDep, HotelDep
 from src.database import async_session_maker
 
 from src.repositories.hotels import HotelsRepository
@@ -34,8 +34,6 @@ async def get_hotels(
             offset=per_page * (pagination.page - 1)
         )
 
-
-
 # Добавляет новый отель в базу данных
 @router.post("/", name='Добавление нового отеля')
 
@@ -52,8 +50,26 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 ):
     async with async_session_maker() as session:
         hotel = await HotelsRepository(session).add(hotel_data)
-
         # Обязательно зафиксировать изменения
         await session.commit()
 
     return {'status': 'OK', 'data': hotel}
+
+@router.put("/{hotel_id}")
+async def edit_hotel(update_id: int, update_data: Hotel, change_data: HotelDep):
+    change_data = {key: value for key, value in change_data.model_dump().items() if value is not None}
+
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(data=update_data, id=update_id, **change_data)
+        # Обязательно зафиксировать изменения
+        await session.commit()
+    return {"status": "OK"}
+
+@router.delete("/{hotel_id}")
+async def delete_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete(id=hotel_id)
+        # Обязательно зафиксировать изменения
+        await session.commit()
+    return {"status": "OK"}
+

@@ -1,4 +1,5 @@
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, update, delete
+
 
 # Паттерн репозитория
 class RepositoryBase:
@@ -16,7 +17,19 @@ class RepositoryBase:
         return result.scalars().all()
 
     # post запрос
-    async def post_object(self, *args, **kwargs):
+    async def add(self, *args, **kwargs):
         statement = insert(self.model)
+        await self.session.execute(statement)
+        await self.session.commit()
+
+    # put запрос
+    async def edit(self, *args, **kwargs):
+        statement = update(self.model)
+        await self.session.execute(statement)
+        await self.session.commit()
+
+    # delete запрос
+    async def delete(self, *args, **kwargs):
+        statement = delete(self.model)
         await self.session.execute(statement)
         await self.session.commit()
