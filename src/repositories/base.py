@@ -1,35 +1,42 @@
+from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
 
 
-# Паттерн репозитория
-class RepositoryBase:
-    # Модель для src/models/...
-    model = None
+class RepositoryBase:   # Паттерн репозитория
+    model = None # Модель для src/models/...
 
     # Создание экзмепляра класса с новой сессией до начала выполнения методов для эффективного потребления ресурсов компьютера
     def __init__(self, session):
         self.session = session
 
-    # get запрос
+    # get метод
     async def get_all(self, *args, **kwargs):
-        query = select(self.model)
-        result = await self.session.execute(query)
+        query = select(self.model) # Формирование запроса к базе данных
+
+        result = await self.session.execute(query) # Отправляем готовый запрос к базе данных
         return result.scalars().all()
 
-    # post запрос
-    async def add(self, *args, **kwargs):
-        statement = insert(self.model)
-        await self.session.execute(statement)
-        await self.session.commit()
+    # post метод
+    async def add(self, data: BaseModel):
+        insert_data_stmt = (insert(self.model) # Формирование запроса к базе данных
+                         .values(**data.model_dump())
+                         .returning(self.model.id))
 
-    # put запрос
-    async def edit(self, *args, **kwargs):
-        statement = update(self.model)
-        await self.session.execute(statement)
-        await self.session.commit()
+        result = await self.session.execute(insert_data_stmt) # Отправляем готовый запрос к базе данных
 
-    # delete запрос
-    async def delete(self, *args, **kwargs):
-        statement = delete(self.model)
-        await self.session.execute(statement)
-        await self.session.commit()
+        return result.scalars().one()
+
+    # put метод
+    async def edit(self, data: BaseModel, exclude_bool: bool = False, **filter_by) -> None:
+        update_data_stmt = (update(self.model) # Формирование запроса к базе данных
+                            .filter_by(**filter_by)
+                            .values(**data.model_dump(exclude_unset=exclude_bool)))
+
+        await self.session.execute(update_data_stmt) # Отправляем готовый запрос к базе данных
+
+    # delete метод
+    async def delete(self, **filter_by) -> None:
+        delete_data_stmt = (delete(self.model) # Формирование запроса к базе данных
+                            .filter_by(**filter_by))
+
+        await self.session.execute(delete_data_stmt) # Отправляем готовый запрос к базе данных
