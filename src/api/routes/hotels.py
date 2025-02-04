@@ -14,8 +14,13 @@ examples = [
     {"title": "Sls Dubai Hotel & Residences", "location": "Sls Dubai Hotel & Residences, Бизнес Бей, эмират Дубай"},
 ]
 
-# Показывает пагинацию базу данных с фильтром
-@router.get("/", name='Получение данных отеля')
+@router.get("/{hotel_id}", name='Получение данных одного отеля')
+async def get_hotel(hotel_id: int):
+    async with async_session_maker() as session:
+        return await HotelsRepository(session).get_one(id=hotel_id)
+
+# Возращает пагинацию базу данных с фильтром
+@router.get("/", name='Получение данных всех отелей')
 async def get_hotels(
         pagination: PaginationDep,
         title: str | None = Query(None, description='ИМЯ'),
@@ -44,9 +49,7 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 ):
     async with async_session_maker() as session:
         hotel = await HotelsRepository(session).add(hotel_data)
-
         await session.commit() # Обязательно зафиксировать изменения
-
     return {'status': 'OK', 'data': hotel}
 
 
@@ -54,7 +57,6 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 async def put_hotel(update_data: Hotel, hotel_id: int):
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(data=update_data, id=hotel_id)
-
         await session.commit() # Обязательно зафиксировать изменения
     return {"status": "OK"}
 
@@ -63,7 +65,6 @@ async def put_hotel(update_data: Hotel, hotel_id: int):
 async def patch_hotel(update_data: Hotel, hotel_id: int):
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(data=update_data, exclude_bool=True, id=hotel_id)
-
         await session.commit() # Обязательно зафиксировать изменения
     return {"status": "OK"}
 
@@ -72,7 +73,6 @@ async def patch_hotel(update_data: Hotel, hotel_id: int):
 async def delete_hotel(hotel_id: int):
     async with async_session_maker() as session:
         await HotelsRepository(session).delete(id=hotel_id)
-
         await session.commit() # Обязательно зафиксировать изменения
     return {"status": "OK"}
 
