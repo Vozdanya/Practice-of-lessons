@@ -6,3 +6,6 @@ class Hotel(BaseModel):
     title: Annotated[str | None, Query(None)]
     location: Annotated[str | None, Query(None)]
 
+class Hotel_Add_ID(Hotel):
+    id: int
+

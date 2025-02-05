@@ -17,7 +17,7 @@ examples = [
 @router.get("/{hotel_id}", name='Получение данных одного отеля')
 async def get_hotel(hotel_id: int):
     async with async_session_maker() as session:
-        return await HotelsRepository(session).get_one(id=hotel_id)
+        return await HotelsRepository(session).get_one_or_none(id=hotel_id)
 
 # Возращает пагинацию базу данных с фильтром
 @router.get("/", name='Получение данных всех отелей')
