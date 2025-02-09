@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Query
 from pydantic import BaseModel
 
-from src.schemas.schemas import Hotel
+from src.schemas.hotels import Hotel
 
 class PaginationParams(BaseModel):
     page: Annotated[int | None, Query(1, ge=1)]

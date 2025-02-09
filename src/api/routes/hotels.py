@@ -1,18 +1,14 @@
 from fastapi import APIRouter, Query, Body
 
 from src.api.dependencies import PaginationDep
+from src.api.examples.examples_of_hotels import examples
 from src.database import async_session_maker
 
 from src.repositories.hotels import HotelsRepository
 
-from src.schemas.schemas import Hotel
+from src.schemas.hotels import Hotel
 
 router = APIRouter(prefix='/hotels', tags=['Отели'])
-
-examples = [
-    {"title": "Сочи Парк Отель", "location": "Континентальный просп., 6, п. г. т. Сириус"},
-    {"title": "Sls Dubai Hotel & Residences", "location": "Sls Dubai Hotel & Residences, Бизнес Бей, эмират Дубай"},
-]
 
 @router.get("/{hotel_id}", name='Получение данных одного отеля')
 async def get_hotel(hotel_id: int):

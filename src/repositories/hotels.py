@@ -2,12 +2,12 @@ from sqlalchemy import select
 
 from src.models.hotels import HotelsOrm
 from src.repositories.base import RepositoryBase
-from src.schemas.schemas import Hotel_Add_ID
+from src.schemas.hotels import HotelAddBase
 
 
 class HotelsRepository(RepositoryBase):
     model = HotelsOrm
-    schema = Hotel_Add_ID
+    schema = HotelAddBase
 
     # get метод
     async def get_all(
