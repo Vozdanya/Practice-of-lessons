@@ -6,7 +6,7 @@ from src.database import async_session_maker
 
 from src.repositories.hotels import HotelsRepository
 
-from src.schemas.hotels import Hotel
+from src.schemas.hotels import HotelRequest
 
 router = APIRouter(prefix='/hotels', tags=['Отели'])
 
@@ -32,7 +32,7 @@ async def get_hotels(
         )
 
 @router.post("/", name='Добавление нового отеля')
-async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
+async def create_hotel(hotel_data: HotelRequest = Body(openapi_examples={
     '1': {
         'summary': 'Сочи',
         'value': examples[0]
@@ -50,7 +50,7 @@ async def create_hotel(hotel_data: Hotel = Body(openapi_examples={
 
 
 @router.put("/{hotel_id}", name='Полное изменение данных отеля')
-async def put_hotel(update_data: Hotel, hotel_id: int):
+async def put_hotel(update_data: HotelRequest, hotel_id: int):
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(data=update_data, id=hotel_id)
         await session.commit() # Обязательно зафиксировать изменения
@@ -58,7 +58,7 @@ async def put_hotel(update_data: Hotel, hotel_id: int):
 
 
 @router.patch("/{hotel_id}", name='Частичное изменение данных отеля')
-async def patch_hotel(update_data: Hotel, hotel_id: int):
+async def patch_hotel(update_data: HotelRequest, hotel_id: int):
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(data=update_data, exclude_bool=True, id=hotel_id)
         await session.commit() # Обязательно зафиксировать изменения

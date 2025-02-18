@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Query
 from pydantic import BaseModel
 
-from src.schemas.hotels import Hotel
+from src.schemas.hotels import HotelRequest
 
 class PaginationParams(BaseModel):
     page: Annotated[int | None, Query(1, ge=1)]
@@ -11,4 +11,4 @@ class PaginationParams(BaseModel):
 
 PaginationDep = Annotated[PaginationParams, Depends()]
 
-HotelDep = Annotated[Hotel, Depends()]
+HotelDep = Annotated[HotelRequest, Depends()]

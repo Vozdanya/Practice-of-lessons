@@ -2,10 +2,10 @@ from typing import Annotated
 from fastapi import Query
 from pydantic import BaseModel
 
-class Hotel(BaseModel):
+class HotelRequest(BaseModel):
     title: Annotated[str | None, Query(None)]
     location: Annotated[str | None, Query(None)]
 
-class HotelAddBase(Hotel):
+class HotelGet(HotelRequest):
     id: int
 
