@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Query, Body
+from fastapi import APIRouter, Query
 
-from src.api.dependencies import PaginationDep
-from src.api.examples.examples_of_hotels import examples
+from src.api.dependencies.dependencies import PaginationDep
+from src.api.examples.examples_of_hotels import examples_create_hotel
 from src.database import async_session_maker
 
 from src.repositories.hotels import HotelsRepository
@@ -15,7 +15,7 @@ async def get_hotel(hotel_id: int):
     async with async_session_maker() as session:
         return await HotelsRepository(session).get_one_or_none(id=hotel_id)
 
-# Возращает пагинацию базу данных с фильтром
+# Возращает пагинацию базы данных с фильтром
 @router.get("/", name='Получение данных всех отелей')
 async def get_hotels(
         pagination: PaginationDep,
@@ -32,17 +32,7 @@ async def get_hotels(
         )
 
 @router.post("/", name='Добавление нового отеля')
-async def create_hotel(hotel_data: HotelRequest = Body(openapi_examples={
-    '1': {
-        'summary': 'Сочи',
-        'value': examples[0]
-    },
-    '2': {
-        'summary': 'Дубай',
-        'value': examples[1]
-    }
-})
-):
+async def create_hotel(hotel_data: HotelRequest = examples_create_hotel):
     async with async_session_maker() as session:
         hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit() # Обязательно зафиксировать изменения

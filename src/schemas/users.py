@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field
@@ -15,5 +15,12 @@ class UserAddBase(BaseModel):
     data_create_account: Annotated[datetime, Field(datetime.now().replace(tzinfo=None))]
     hashed_password: str
 
-class UserGet(UserRequest):
+class UserGet(BaseModel):
     id: int
+    email: EmailStr
+    username: str
+    birthday_data: date | None  # Поле может быть необязательным
+    data_create_account: datetime
+
+class UserWithHashedPassword(UserGet):
+    hashed_password: str

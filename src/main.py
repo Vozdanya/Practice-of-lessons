@@ -9,7 +9,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Импорт endpoints
 from src.api.routes.hotels import router as router_hotels
-from src.api.routes.users import router as router_users
+from src.api.routes.auth import router as router_users
 
 app = FastAPI()
 

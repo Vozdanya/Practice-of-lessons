@@ -16,13 +16,13 @@ class RepositoryBase:   # Паттерн репозитория
         obj = result.scalars().one_or_none()
         if obj is None:
             return None
-        return self.schema.model_validate(obj, from_attributes=True)
+        return self.schema.model_validate(obj, from_attributes=True) # Для извлечения атрибутов из модели базы данных
 
     async def get_all(self, *args, **kwargs): # get метод
         query = select(self.model) # Формирование запроса к базе данных
         result = await self.session.execute(query) # Отправляем готовый запрос к базе данных
         objects = result.scalars().all()
-        return [self.schema.model_validate(obj, from_attributes=True) for obj in objects]
+        return [self.schema.model_validate(obj, from_attributes=True) for obj in objects] # Для извлечения атрибутов из модели базы данных
 
     async def add(self, data: BaseModel): # post метод
         insert_data_stmt = (insert(self.model) # Формирование запроса к базе данных
