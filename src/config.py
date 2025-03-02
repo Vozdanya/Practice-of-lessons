@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: int
@@ -10,7 +9,7 @@ class Settings(BaseSettings):
 
     @property
     def DB_URL(self):
-        # postgresql+asyncpg указывает, что используется PostgreSQL с асинхронным драйвером asyncpg.
+        # Postgresql + asyncpg указывает, что используется Postgresql с асинхронным драйвером asyncpg.
         # Полный путь к базе данных
         return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
 
