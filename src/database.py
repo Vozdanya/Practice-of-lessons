@@ -1,7 +1,8 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
 from src.config import settings
+
 
 # Создание асинхронного движка
 engine = create_async_engine(settings.DB_URL)
@@ -10,7 +11,7 @@ engine = create_async_engine(settings.DB_URL)
 
 # bind=engine: Указывает, что сессии будут использовать созданный ранее движок (engine).
 
-# expire_on_commit=False: Отключает автоматическое "истечение" (expire) объектов после коммита.
+# Expire_on_commit = False: Отключает автоматическое "истечение" (expire) объектов после коммита.
 # Это полезно, чтобы объекты оставались доступными для использования после завершения транзакции.
 
 async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
