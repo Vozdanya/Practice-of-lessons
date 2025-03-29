@@ -1,6 +1,5 @@
 from typing import Annotated
 
-from sqlalchemy.exc import IntegrityError
 from fastapi import APIRouter, HTTPException, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -17,21 +16,21 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 @router.post("/register")
 async def register_user(data: UserRequest):
     async with async_session_maker() as session:
-        try:
-            await UsersRepository(session).add(data)
-            await session.commit()
-        except IntegrityError:
-            # Проверяем, что ошибка связана с нарушением уникальности
-            if "unique constraint" in str(IntegrityError.orig).lower(): # Используем IntegrityError.orig для доступа к оригинальной ошибке
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Username or email already exists",
-                )
-            # Если это другая ошибка IntegrityError, выбрасываем общее исключение
+        repo = UsersRepository(session)
+
+        # Проверяем, существует ли пользователь с таким username или email
+        existing_username = await repo.get_one_or_none(username=data.username)
+        existing_email = await repo.get_one_or_none(email=data.email)
+
+        if existing_username or existing_email:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="An error occurred while processing your request",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username or email already exists",
             )
+        # Если пользователь не существует, добавляем его
+        await repo.add(data)
+        await session.commit()
+
     return {"Status": "OK"}
 
 
@@ -40,10 +39,13 @@ async def register_user(data: UserRequest):
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], response: Response):
     async with async_session_maker() as session:
         user_exist = await UsersRepository(session).get_user_with_hashed_password(username=form_data.username)
-    if not user_exist:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    if not authservice.verify_password(form_data.password, user_exist.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
+    # Проверка на существование пользователя и на совпадение введенного пароля
+    if (not user_exist) or (not authservice.verify_password(form_data.password, user_exist.hashed_password)):
+        raise HTTPException(
+            status_code=400,
+            detail="Incorrect username or password"
+        )
     access_token = authservice.create_access_token({'user_id': user_exist.id})
     response.set_cookie(
         "access_token",
@@ -62,21 +64,9 @@ async def read_users_me(user_id: Annotated[int, Depends(get_current_user)]):
         user = await UsersRepository(session).get_one_or_none(id=user_id)
         if user is None:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=404,
                 detail="User not found",
                 headers={"WWW-Authenticate": "Bearer"},
             )
     return user
 
-# Персональная информация по авторизованному пользователю
-@router.get("/men")
-async def read_users_me(user_id: Annotated[int, Depends(get_current_user)]):
-    async with async_session_maker() as session:
-        user = await UsersRepository(session).get_one_or_none(id=user_id)
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found2",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    return user

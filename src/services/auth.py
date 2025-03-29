@@ -1,5 +1,6 @@
 from datetime import timezone, datetime, timedelta
 
+from fastapi import HTTPException, status
 import jwt
 from passlib.context import CryptContext
 
@@ -21,5 +22,24 @@ class AuthService:
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool: # Проверка совпадения пароля при аутентификации
         return self.pwd_context.verify(plain_password, hashed_password)
+
+    def decode_token(self, token):
+        try:
+            return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
+
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        except jwt.PyJWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
 
 authservice = AuthService()
