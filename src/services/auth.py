@@ -3,6 +3,7 @@ from datetime import timezone, datetime, timedelta
 from fastapi import HTTPException, status
 import jwt
 from passlib.context import CryptContext
+from pydantic import BaseModel
 
 from src.config import settings
 
@@ -23,6 +24,11 @@ class AuthService:
     def verify_password(self, plain_password: str, hashed_password: str) -> bool: # Проверка совпадения пароля при аутентификации
         return self.pwd_context.verify(plain_password, hashed_password)
 
+    def authenticate(self, base_password, user_password):
+        # Проверка на существование пользователя и на совпадение введенного пароля
+        if user_password and authservice.verify_password(base_password, user_password):
+            return True
+
     def decode_token(self, token):
         try:
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
@@ -40,6 +46,10 @@ class AuthService:
                 detail="Invalid token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
+    def replacement_with_hashed_password(self, data: BaseModel, schema) -> BaseModel:
+        user_data_dict = data.model_dump(exclude={"password"}, exclude_unset=True)
+        return schema(**user_data_dict, hashed_password=self.pwd_context.hash(data.password))
+
 
 authservice = AuthService()

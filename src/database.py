@@ -1,3 +1,5 @@
+import sqlalchemy
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -14,6 +16,7 @@ engine = create_async_engine(settings.DB_URL)
 # Это полезно, чтобы объекты оставались доступными для использования после завершения транзакции.
 
 async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)
+
 
 # Для наследования в src/models/...
 class Base(DeclarativeBase):

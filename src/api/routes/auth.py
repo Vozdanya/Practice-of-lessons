@@ -38,10 +38,8 @@ async def register_user(data: UserRequest):
 @router.post('/token')
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], response: Response):
     async with async_session_maker() as session:
-        user_exist = await UsersRepository(session).get_user_with_hashed_password(username=form_data.username)
-
-    # Проверка на существование пользователя и на совпадение введенного пароля
-    if (not user_exist) or (not authservice.verify_password(form_data.password, user_exist.hashed_password)):
+        user_exist = await UsersRepository(session).authenticate({'username': form_data.username}, form_data.password)
+    if not user_exist:
         raise HTTPException(
             status_code=400,
             detail="Incorrect username or password"
